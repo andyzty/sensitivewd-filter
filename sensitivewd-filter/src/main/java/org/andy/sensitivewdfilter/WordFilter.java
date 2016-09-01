@@ -33,7 +33,7 @@ public class WordFilter {
 		try {
 			init();
 		} catch (Exception e) {
-			throw new RuntimeException("初始化过滤器失败");
+			// 加载失败
 		}
 	}
 
@@ -45,6 +45,7 @@ public class WordFilter {
 
 	/**
 	 * 增加敏感词
+	 * 
 	 * @param path
 	 * @return
 	 */
@@ -77,7 +78,7 @@ public class WordFilter {
 	 * @param words
 	 */
 	private static void addStopWord(final List<String> words) {
-		if (words != null && words.size() > 0) {
+		if (!isEmpty(words)) {
 			char[] chs;
 			for (String curr : words) {
 				chs = curr.toCharArray();
@@ -90,10 +91,11 @@ public class WordFilter {
 
 	/**
 	 * 添加DFA节点
+	 * 
 	 * @param words
 	 */
 	private static void addSensitiveWord(final List<String> words) {
-		if (words != null && words.size() > 0) {
+		if (!isEmpty(words)) {
 			char[] chs;
 			int fchar;
 			int lastIndex;
@@ -120,94 +122,101 @@ public class WordFilter {
 
 	/**
 	 * 过滤判断 将敏感词转化为成屏蔽词
+	 * 
 	 * @param src
 	 * @return
 	 */
 	public static final String doFilter(final String src) {
-		char[] chs = src.toCharArray();
-		int length = chs.length;
-		int currc;
-		int k;
-		WordNode node;
-		for (int i = 0; i < length; i++) {
-			currc = charConvert(chs[i]);
-			if (!set.contains(currc)) {
-				continue;
-			}
-			node = nodes.get(currc);// 日 2
-			if (node == null)// 其实不会发生，习惯性写上了
-				continue;
-			boolean couldMark = false;
-			int markNum = -1;
-			if (node.isLast()) {// 单字匹配（日）
-				couldMark = true;
-				markNum = 0;
-			}
-			// 继续匹配（日你/日你妹），以长的优先
-			// 你-3 妹-4 夫-5
-			k = i;
-			for (; ++k < length;) {
-				int temp = charConvert(chs[k]);
-				if (stopwdSet.contains(temp))
+		if (set != null && nodes != null) {
+			char[] chs = src.toCharArray();
+			int length = chs.length;
+			int currc;
+			int k;
+			WordNode node;
+			for (int i = 0; i < length; i++) {
+				currc = charConvert(chs[i]);
+				if (!set.contains(currc)) {
 					continue;
-				node = node.querySub(temp);
-				if (node == null)// 没有了
-					break;
-				if (node.isLast()) {
+				}
+				node = nodes.get(currc);// 日 2
+				if (node == null)// 其实不会发生，习惯性写上了
+					continue;
+				boolean couldMark = false;
+				int markNum = -1;
+				if (node.isLast()) {// 单字匹配（日）
 					couldMark = true;
-					markNum = k - i;// 3-2
+					markNum = 0;
+				}
+				// 继续匹配（日你/日你妹），以长的优先
+				// 你-3 妹-4 夫-5
+				k = i;
+				for (; ++k < length;) {
+					int temp = charConvert(chs[k]);
+					if (stopwdSet != null && stopwdSet.contains(temp))
+						continue;
+					node = node.querySub(temp);
+					if (node == null)// 没有了
+						break;
+					if (node.isLast()) {
+						couldMark = true;
+						markNum = k - i;// 3-2
+					}
+				}
+				if (couldMark) {
+					for (k = 0; k <= markNum; k++) {
+						chs[k + i] = SIGN;
+					}
+					i = i + markNum;
 				}
 			}
-			if (couldMark) {
-				for (k = 0; k <= markNum; k++) {
-					chs[k + i] = SIGN;
-				}
-				i = i + markNum;
-			}
+			return new String(chs);
 		}
 
-		return new String(chs);
+		return src;
 	}
-	
+
 	/**
 	 * 是否包含敏感词
+	 * 
 	 * @param src
 	 * @return
 	 */
 	public static final boolean isContains(final String src) {
-		char[] chs = src.toCharArray();
-		int length = chs.length;
-		int currc;
-		int k;
-		WordNode node;
-		for (int i = 0; i < length; i++) {
-			currc = charConvert(chs[i]);
-			if (!set.contains(currc)) {
-				continue;
-			}
-			node = nodes.get(currc);// 日 2
-			if (node == null)// 其实不会发生，习惯性写上了
-				continue;
-			boolean couldMark = false;
-			if (node.isLast()) {// 单字匹配（日）
-				couldMark = true;
-			}
-			// 继续匹配（日你/日你妹），以长的优先
-			// 你-3 妹-4 夫-5
-			k = i;
-			for (; ++k < length;) {
-				int temp = charConvert(chs[k]);
-				if (stopwdSet.contains(temp))
+		if (set != null && nodes != null) {
+			char[] chs = src.toCharArray();
+			int length = chs.length;
+			int currc;
+			int k;
+			WordNode node;
+			for (int i = 0; i < length; i++) {
+				currc = charConvert(chs[i]);
+				if (!set.contains(currc)) {
 					continue;
-				node = node.querySub(temp);
-				if (node == null)// 没有了
-					break;
-				if (node.isLast()) {
+				}
+				node = nodes.get(currc);// 日 2
+				if (node == null)// 其实不会发生，习惯性写上了
+					continue;
+				boolean couldMark = false;
+				if (node.isLast()) {// 单字匹配（日）
 					couldMark = true;
 				}
-			}
-			if (couldMark) {
-				return true;
+				// 继续匹配（日你/日你妹），以长的优先
+				// 你-3 妹-4 夫-5
+				k = i;
+				for (; ++k < length;) {
+					int temp = charConvert(chs[k]);
+					if (stopwdSet != null && stopwdSet.contains(temp))
+						continue;
+					node = node.querySub(temp);
+					if (node == null)// 没有了
+						break;
+					if (node.isLast()) {
+						couldMark = true;
+					}
+				}
+				if (couldMark) {
+					return true;
+				}
 			}
 		}
 
@@ -225,4 +234,16 @@ public class WordFilter {
 		return (r >= 'A' && r <= 'Z') ? r + 32 : r;
 	}
 
+	/**
+	 * 判断一个集合是否为空
+	 * 
+	 * @param col
+	 * @return
+	 */
+	public static <T> boolean isEmpty(final Collection<T> col) {
+		if (col == null || col.isEmpty()) {
+			return true;
+		}
+		return false;
+	}
 }
