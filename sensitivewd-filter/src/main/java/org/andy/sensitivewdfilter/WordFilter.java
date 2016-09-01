@@ -130,7 +130,8 @@ public class WordFilter {
 		if (set != null && nodes != null) {
 			char[] chs = src.toCharArray();
 			int length = chs.length;
-			int currc;
+			int currc; // 当前检查的字符
+			int cpcurrc; // 当前检查字符的备份
 			int k;
 			WordNode node;
 			for (int i = 0; i < length; i++) {
@@ -150,8 +151,11 @@ public class WordFilter {
 				// 继续匹配（日你/日你妹），以长的优先
 				// 你-3 妹-4 夫-5
 				k = i;
+				cpcurrc = currc; // 当前字符的拷贝
 				for (; ++k < length;) {
 					int temp = charConvert(chs[k]);
+					if (temp == cpcurrc)
+						continue;
 					if (stopwdSet != null && stopwdSet.contains(temp))
 						continue;
 					node = node.querySub(temp);
@@ -161,6 +165,7 @@ public class WordFilter {
 						couldMark = true;
 						markNum = k - i;// 3-2
 					}
+					cpcurrc = temp;
 				}
 				if (couldMark) {
 					for (k = 0; k <= markNum; k++) {
@@ -185,7 +190,8 @@ public class WordFilter {
 		if (set != null && nodes != null) {
 			char[] chs = src.toCharArray();
 			int length = chs.length;
-			int currc;
+			int currc; // 当前检查的字符
+			int cpcurrc; // 当前检查字符的备份
 			int k;
 			WordNode node;
 			for (int i = 0; i < length; i++) {
@@ -203,8 +209,11 @@ public class WordFilter {
 				// 继续匹配（日你/日你妹），以长的优先
 				// 你-3 妹-4 夫-5
 				k = i;
+				cpcurrc = currc;
 				for (; ++k < length;) {
 					int temp = charConvert(chs[k]);
+					if (temp == cpcurrc)
+						continue;
 					if (stopwdSet != null && stopwdSet.contains(temp))
 						continue;
 					node = node.querySub(temp);
@@ -213,6 +222,7 @@ public class WordFilter {
 					if (node.isLast()) {
 						couldMark = true;
 					}
+					cpcurrc = temp;
 				}
 				if (couldMark) {
 					return true;
