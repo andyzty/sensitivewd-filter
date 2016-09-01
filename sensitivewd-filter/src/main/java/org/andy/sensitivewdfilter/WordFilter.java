@@ -31,11 +31,7 @@ public class WordFilter {
 
 	static {
 		try {
-			long a = System.nanoTime();
 			init();
-			a = System.nanoTime() - a;
-			System.out.println("加载时间 : " + a + "ns");
-			System.out.println("加载时间 : " + a / 1000000 + "ms");
 		} catch (Exception e) {
 			throw new RuntimeException("初始化过滤器失败");
 		}
