@@ -22,11 +22,18 @@ doFilter()：过滤敏感词
 加载时间 : 12ms 
 解析时间 : 15584375ns 
 解析时间 : 15ms 
-*********
+************
 
 
 是否包含敏感词： true 
 解析时间 : 92783ns 
 解析时间 : 0ms 
+
+支持如下类型类型过滤检测：
+fuck 全小写
+FuCk 大小写
+ｆｕｃｋ全角半角
+f!!!u&c  ###k 停顿词
+fffuuuucccckkk 重复词
 
 博文地址：http://blog.csdn.net/fengshizty/article/details/52373005
